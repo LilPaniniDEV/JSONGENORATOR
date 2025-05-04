@@ -2,101 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Offline AC JSON Builder</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-    h1 {
-      text-align: center;
-    }
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      font-size: 1rem;
-    }
-    pre {
-      background: #222;
-      color: #0f0;
-      padding: 15px;
-      overflow: auto;
-      white-space: pre-wrap;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .section { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .section h2 { cursor: pointer; }
+    .section-content { display: none; margin-top: 10px; }
+    pre { background: #f4f4f4; padding: 10px; }
   </style>
 </head>
 <body>
+
   <h1>Offline AC JSON Builder</h1>
-  
-  <div class="form-group">
-    <label>Name:</label>
-    <input id="name" type="text" placeholder="Enter name" />
+
+  <div class="section">
+    <h2 onclick="toggleSection(this)">General Info</h2>
+    <div class="section-content">
+      <label>Name: <input type="text" id="name" oninput="updateJSON()"></label><br><br>
+      <label>Description: <input type="text" id="description" oninput="updateJSON()"></label>
+    </div>
   </div>
 
-  <div class="form-group">
-    <label>Description:</label>
-    <textarea id="description" placeholder="Enter description"></textarea>
+  <div class="section">
+    <h2 onclick="toggleSection(this)">Attributes</h2>
+    <div class="section-content">
+      <label>Type:
+        <select id="type" onchange="updateJSON()">
+          <option value="offense">Offense</option>
+          <option value="defense">Defense</option>
+          <option value="utility">Utility</option>
+        </select>
+      </label><br><br>
+      <label>Rarity:
+        <select id="rarity" onchange="updateJSON()">
+          <option value="common">Common</option>
+          <option value="rare">Rare</option>
+          <option value="epic">Epic</option>
+          <option value="legendary">Legendary</option>
+        </select>
+      </label>
+    </div>
   </div>
 
-  <div class="form-group">
-    <label>Type:</label>
-    <select id="type">
-      <option value="offense">Offense</option>
-      <option value="defense">Defense</option>
-      <option value="utility">Utility</option>
-    </select>
+  <div class="section">
+    <h2 onclick="toggleSection(this)">Abilities</h2>
+    <div class="section-content" id="abilities-section">
+      <div>
+        <label>Ability: <input type="text" class="ability" oninput="updateJSON()"></label>
+        <button onclick="addAbility()">Add Ability</button>
+      </div>
+    </div>
   </div>
 
-  <div class="form-group">
-    <label>Rarity:</label>
-    <select id="rarity">
-      <option value="common">Common</option>
-      <option value="rare">Rare</option>
-      <option value="epic">Epic</option>
-      <option value="legendary">Legendary</option>
-    </select>
-  </div>
-
-  <div class="form-group">
-    <label>Ability:</label>
-    <input id="ability" type="text" placeholder="Enter ability" />
-  </div>
-
-  <button onclick="generateJSON()">Generate JSON</button>
-  <button onclick="copyJSON()">Copy to Clipboard</button>
-
-  <h2>Output:</h2>
-  <pre id="output"></pre>
+  <h2>Generated JSON:</h2>
+  <pre id="json-output">{}</pre>
+  <button onclick="copyJSON()">Copy JSON</button>
 
   <script>
-    function generateJSON() {
-      const data = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        type: document.getElementById('type').value,
-        rarity: document.getElementById('rarity').value,
-        ability: document.getElementById('ability').value
+    function toggleSection(header) {
+      const content = header.nextElementSibling;
+      content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function updateJSON() {
+      const name = document.getElementById('name').value;
+      const description = document.getElementById('description').value;
+      const type = document.getElementById('type').value;
+      const rarity = document.getElementById('rarity').value;
+      const abilities = Array.from(document.getElementsByClassName('ability')).map(input => input.value).filter(val => val);
+
+      const json = {
+        name,
+        description,
+        type,
+        rarity,
+        abilities
       };
 
-      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('json-output').textContent = JSON.stringify(json, null, 2);
+    }
+
+    function addAbility() {
+      const abilitiesSection = document.getElementById('abilities-section');
+      const newAbilityDiv = document.createElement('div');
+      newAbilityDiv.innerHTML = '<label>Ability: <input type="text" class="ability" oninput="updateJSON()"></label>';
+      abilitiesSection.appendChild(newAbilityDiv);
     }
 
     function copyJSON() {
-      const output = document.getElementById('output').textContent;
-      navigator.clipboard.writeText(output).then(() => {
-        alert("Copied to clipboard!");
+      const jsonText = document.getElementById('json-output').textContent;
+      navigator.clipboard.writeText(jsonText).then(() => {
+        alert('JSON copied to clipboard!');
       });
     }
+
+    // Initialize sections to be visible
+    document.querySelectorAll('.section-content').forEach(section => section.style.display = 'block');
   </script>
+
 </body>
 </html>
